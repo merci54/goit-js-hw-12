@@ -21,7 +21,7 @@ export function createGallery(images) {
             captionsData: 'alt',
             captionDelay: 250
         });
-    }, 100);
+    }, 10);
 
     return images.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
         <li class="img-card">
@@ -64,4 +64,19 @@ export function showLoader() {
 
 export function hideLoader() {
     refs.loader.classList.add('hidden');
+}
+
+export function showLoadMoreButton() {
+    refs.loadMore.classList.remove('load-more-hidden');
+}
+
+export function hideLoadMoreButton() {
+    refs.loadMore.classList.add('load-more-hidden');
+}
+
+export function showPaginationLoader() {
+    refs.paginationLoader.classList.remove('hidden');
+}
+export function hidePaginationLoader() {
+    refs.paginationLoader.classList.add('hidden');
 }

@@ -1,71 +1,106 @@
-
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
 import { refs } from "./js/refs";
 import { getImagesByQuery, per_page } from './js/pixabay-api'
-import { clearGallery } from "./js/render-functions";
-import { hideLoader } from "./js/render-functions";
-import { createGallery } from "./js/render-functions";
+import { createGallery, clearGallery, hideLoader, showLoader, showLoadMoreButton, hideLoadMoreButton, showPaginationLoader, hidePaginationLoader } from "./js/render-functions";
 
-let page = 1;
+let page = 30;
+let searchValue = '';
 
 refs.form.addEventListener('submit', handleSubmit);
+refs.loadMore.addEventListener('click', handleClick);
 
-function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
-
-    // очистка галереї
   clearGallery();
+  hideLoadMoreButton();
+  showLoader();
 
-  page = 34;
-  // перевірка значення інпуту
-  if (!refs.input.value.trim()) {
-    iziToast.error({
-                message: 'Sorry, there are no images matching your search query. Please try again!',
-                position: 'topRight',
+  searchValue = refs.input.value.trim();
 
-            })
-    return
+  page = 1;
+
+  if (!searchValue) {
+    return iziToast.error({
+      message: 'Sorry, there are no images matching your search query. Please try again!',
+      position: 'topRight',
+
+    })
   }
 
 
-  getImagesByQuery(refs.input.value.trim(), page)
-    .then(({ data }) => {
+  try {
+    const data = await getImagesByQuery(searchValue, page);
 
-    // рендер галереї
+    showLoadMoreButton();
 
-      refs.gallery.innerHTML = createGallery(data.hits);
-      const total_pages = Math.ceil(data.total / per_page);
-
-      if (page < total_pages) {
-        refs.loadMore.classList.replace('load-more-hidden', 'load-more');
-        page++;
-      }
-
-      console.log(total_pages)
-      console.log(data);
+    refs.gallery.innerHTML = createGallery(data.hits);
 
 
-
-    // якщо не знайшло жодного результату
     if (data.hits.length === 0) {
 
-        // сповіщення для користувачів
-        iziToast.error({
-            message: 'Sorry, there are no images matching your search query. Please try again!',
-            position: 'topRight',
-        })
-    }})
-    .catch(error => {
+      hideLoadMoreButton();
 
-    // приховання лоадеру якщо виникла помилка
-    hideLoader();
+      // сповіщення для користувачів
+      iziToast.error({
+        message: 'Sorry, there are no images matching your search query. Please try again!',
+        position: 'topRight',
+      })
+
+    }
+
+
+  } catch (error) {
+
     iziToast.error({
       message: `${error.message}`,
       position: 'topRight',
-  })
+    })
+  } finally {
+    hideLoader();
+  }
 
-  })
 
+}
 
+async function handleClick() {
+  page++;
+  hideLoadMoreButton();
+  showPaginationLoader();
+  refs.loadMore.disabled = true;
+
+  try {
+    const data = await getImagesByQuery(searchValue, page);
+    const total_pages = Math.ceil(data.totalHits / per_page);
+    refs.gallery.insertAdjacentHTML('beforeend', createGallery(data.hits));
+
+    hidePaginationLoader();
+    showLoadMoreButton();
+
+    if (page >= total_pages) {
+
+      hideLoadMoreButton();
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight'
+      })
+
+    }
+
+    const cardHeight = refs.gallery.firstElementChild.getBoundingClientRect().height;
+
+    window.scrollBy({
+      top: cardHeight * 2,
+      left: 0,
+      behavior: "smooth"
+    });
+
+  } catch (error) {
+    iziToast.error({
+      message: `${error.message}`,
+      position: 'topRight',
+    })
+  } finally {
+    refs.loadMore.disabled = false;
+  }
 }
