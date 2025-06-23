@@ -11,17 +11,6 @@ export function createGallery(images) {
     // видалення лоадеру
     hideLoader();
 
-    // створення лайтбоксу
-    setTimeout(() => {
-        if (galleryBox) {
-            galleryBox.refresh()
-        }
-
-        galleryBox = new SimpleLightbox('.gallery a', {
-            captionsData: 'alt',
-            captionDelay: 250
-        });
-    }, 10);
 
     return images.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
         <li class="img-card">
@@ -51,6 +40,17 @@ export function createGallery(images) {
             </div>
         </li>
         `).join("");
+}
+
+export function refreshLightBox() {
+    if (galleryBox) {
+        galleryBox.refresh();
+    }
+
+    galleryBox = new SimpleLightbox('.gallery a', {
+        captionsData: 'alt',
+        captionDelay: 250
+    });
 }
 
 // очистка галереї

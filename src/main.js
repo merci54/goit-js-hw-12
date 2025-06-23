@@ -2,7 +2,7 @@ import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
 import { refs } from "./js/refs";
 import { getImagesByQuery, per_page } from './js/pixabay-api'
-import { createGallery, clearGallery, hideLoader, showLoader, showLoadMoreButton, hideLoadMoreButton, showPaginationLoader, hidePaginationLoader } from "./js/render-functions";
+import { createGallery, clearGallery, hideLoader, showLoader, showLoadMoreButton, hideLoadMoreButton, showPaginationLoader, hidePaginationLoader, refreshLightBox } from "./js/render-functions";
 
 let page = 30;
 let searchValue = '';
@@ -35,6 +35,7 @@ async function handleSubmit(e) {
     showLoadMoreButton();
 
     refs.gallery.innerHTML = createGallery(data.hits);
+    refreshLightBox();
 
 
     if (data.hits.length === 0) {
@@ -52,14 +53,13 @@ async function handleSubmit(e) {
 
   } catch (error) {
 
+    hideLoader();
+
     iziToast.error({
       message: `${error.message}`,
       position: 'topRight',
     })
-  } finally {
-    hideLoader();
   }
-
 
 }
 
@@ -72,7 +72,9 @@ async function handleClick() {
   try {
     const data = await getImagesByQuery(searchValue, page);
     const total_pages = Math.ceil(data.totalHits / per_page);
+
     refs.gallery.insertAdjacentHTML('beforeend', createGallery(data.hits));
+    refreshLightBox();
 
     hidePaginationLoader();
     showLoadMoreButton();
