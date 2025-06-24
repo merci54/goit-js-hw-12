@@ -46,19 +46,8 @@ async function handleSubmit(e) {
     const data = await getImagesByQuery(searchValue, page);
     const total_pages = Math.ceil(data.totalHits / per_page);
 
-    if (page >= total_pages) {
-
-      hideLoadMoreButton();
-      iziToast.info({
-        message: "We're sorry, but you've reached the end of search results.",
-        position: 'topRight'
-      })
-
-    }
-
-    showLoadMoreButton();
-
-    refs.gallery.innerHTML = createGallery(data.hits);
+    // refs.gallery.innerHTML = createGallery(data.hits);
+    createGallery(data.hits);
     refreshLightBox();
 
 
@@ -67,11 +56,23 @@ async function handleSubmit(e) {
       hideLoadMoreButton();
 
       // сповіщення для користувачів
-      iziToast.error({
+      return iziToast.error({
         message: 'Sorry, there are no images matching your search query. Please try again!',
         position: 'topRight',
       })
 
+    }
+
+    if (page >= total_pages) {
+
+      hideLoadMoreButton();
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight'
+      })
+
+    } else {
+      showLoadMoreButton();
     }
 
 
@@ -98,7 +99,8 @@ async function handleClick() {
     const data = await getImagesByQuery(searchValue, page);
     const total_pages = Math.ceil(data.totalHits / per_page);
 
-    refs.gallery.insertAdjacentHTML('beforeend', createGallery(data.hits));
+    // refs.gallery.insertAdjacentHTML('beforeend', createGallery(data.hits));
+    createGallery(data.hits)
     refreshLightBox();
 
     hidePaginationLoader();

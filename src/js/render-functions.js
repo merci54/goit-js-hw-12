@@ -10,7 +10,7 @@ let galleryBox = new SimpleLightbox('.gallery a', {
 
 // рендер списку зображень
 export function createGallery(images) {
-    return images.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
+    const renderedImages = images.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
         <li class="img-card">
             <div class="img-block">
                 <a class="big-image" href="${largeImageURL}">
@@ -38,6 +38,8 @@ export function createGallery(images) {
             </div>
         </li>
         `).join("");
+
+    refs.gallery.insertAdjacentHTML('beforeend', renderedImages)
 }
 
 export function refreshLightBox() {
