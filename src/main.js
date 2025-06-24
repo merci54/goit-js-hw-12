@@ -4,7 +4,10 @@ import { refs } from "./js/refs";
 import { getImagesByQuery, per_page } from './js/pixabay-api'
 import { createGallery, clearGallery, hideLoader, showLoader, showLoadMoreButton, hideLoadMoreButton, showPaginationLoader, hidePaginationLoader, refreshLightBox } from "./js/render-functions";
 
-let page = 30;
+// Поточна сторінка
+let page = 1;
+
+// Значення з інпуту
 let searchValue = '';
 
 refs.form.addEventListener('submit', handleSubmit);
@@ -12,15 +15,26 @@ refs.loadMore.addEventListener('click', handleClick);
 
 async function handleSubmit(e) {
   e.preventDefault();
+
+  // Очистка галереї
   clearGallery();
+
+  // Приховання кнопки пагінації
   hideLoadMoreButton();
+
+  // Показ лоадеру
   showLoader();
 
   searchValue = refs.input.value.trim();
-
   page = 1;
 
+  // Якщо нема значення з інпуту
   if (!searchValue) {
+
+    clearGallery();
+    hideLoadMoreButton();
+    hideLoader();
+
     return iziToast.error({
       message: 'Sorry, there are no images matching your search query. Please try again!',
       position: 'topRight',
@@ -28,9 +42,19 @@ async function handleSubmit(e) {
     })
   }
 
-
   try {
     const data = await getImagesByQuery(searchValue, page);
+    const total_pages = Math.ceil(data.totalHits / per_page);
+
+    if (page >= total_pages) {
+
+      hideLoadMoreButton();
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight'
+      })
+
+    }
 
     showLoadMoreButton();
 
@@ -53,12 +77,13 @@ async function handleSubmit(e) {
 
   } catch (error) {
 
-    hideLoader();
-
     iziToast.error({
       message: `${error.message}`,
       position: 'topRight',
     })
+  } finally {
+    hideLoader();
+
   }
 
 }

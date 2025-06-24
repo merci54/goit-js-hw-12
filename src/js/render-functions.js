@@ -3,15 +3,13 @@ import { refs } from "./refs";
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 
-let galleryBox;
+let galleryBox = new SimpleLightbox('.gallery a', {
+    captionsData: 'alt',
+    captionDelay: 250
+});
 
 // рендер списку зображень
 export function createGallery(images) {
-
-    // видалення лоадеру
-    hideLoader();
-
-
     return images.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
         <li class="img-card">
             <div class="img-block">
@@ -47,10 +45,6 @@ export function refreshLightBox() {
         galleryBox.refresh();
     }
 
-    galleryBox = new SimpleLightbox('.gallery a', {
-        captionsData: 'alt',
-        captionDelay: 250
-    });
 }
 
 // очистка галереї
